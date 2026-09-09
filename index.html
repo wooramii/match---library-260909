@@ -2,325 +2,967 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>말차 맛 예측 고정형 대시보드</title>
+  <title>말차 라이브러리 · 맛 예측 대시보드</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
     :root {
       --bg: #0b1120;
+      --bg-soft: #020617;
       --panel: #020617;
       --border: #1f2937;
-      --accent-green: #22c55e;
-      --accent-blue: #38bdf8;
-      --fg: #f3f4f6;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --accent2: #38bdf8;
+      --fg: #e5e7eb;
       --fg-soft: #9ca3af;
-      --radius: 12px;
+      --danger: #f97373;
+      --radius: 10px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { 
-      height: 100%; 
-      background: var(--bg); 
-      color: var(--fg); 
-      font-family: 'Pretendard', system-ui, sans-serif;
-      overflow: hidden; /* 전체 페이지 스크롤 방지 */
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* 전체 레이아웃: 좌측(고정폭) + 우측(가변) */
-    .dashboard {
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%, #020617 100%);
+      color: var(--fg);
+    }
+
+    .page {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    header {
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--fg-soft);
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--accent2);
+      background: rgba(15, 23, 42, 1);
+      border-radius: 999px;
+      padding: 4px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      margin-bottom: 8px;
+    }
+
+    .layout {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 360px 1fr;
       gap: 16px;
-      height: 100vh;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .right-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .bottom-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.1), rgba(15,23,42,1) 40%);
+      border-radius: var(--radius);
+      border: 1px solid rgba(31, 41, 55, 0.9);
       padding: 16px;
     }
 
-    /* 좌측 입력 패널 */
-    .sidebar {
+    .panel.secondary {
+      background: radial-gradient(circle at top right, rgba(56,189,248,0.12), #020617 40%);
+    }
+
+    .panel-header {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      padding-right: 4px;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
     }
 
-    /* 패널 공통 스타일 */
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* 우측 영역: 상단(차트) + 하단(데이터) */
-    .main-content {
-      display: grid;
-      grid-template-rows: 1fr 1fr; /* 상하 1:1 비율 */
-      gap: 16px;
-      min-height: 0; /* 자식 요소의 overflow 방지 */
-    }
-
-    /* 가로 2개 배치 (차트 로우, 데이터 로우 공통) */
-    .row-split {
-      display: grid;
-      grid-template-columns: 1fr 1fr; /* 좌우 1:1 비율 고정 */
-      gap: 16px;
-      min-height: 0;
-    }
-
-    /* 제목 스타일 */
     .panel-title {
       font-size: 15px;
       font-weight: 600;
+    }
+
+    .panel-caption {
+      font-size: 11px;
+      color: var(--fg-soft);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--fg-soft);
+      margin-bottom: 4px;
+    }
+
+    .field {
       margin-bottom: 12px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--fg);
+      font-size: 13px;
+    }
+
+    select:focus, input[type="number"]:focus {
+      outline: 1px solid var(--accent2);
+      border-color: var(--accent2);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--fg-soft);
+      margin-top: 3px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      margin-bottom: 8px;
+    }
+
+    button {
+      cursor: pointer;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 8px 16px;
+      font-size: 13px;
+      background: rgba(15,23,42,0.85);
+      color: var(--fg);
+    }
+
+    button.primary {
+      border-color: rgba(34,197,94,0.7);
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      color: #0b1120;
+      font-weight: 500;
+    }
+
+    button.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      font-size: 12px;
+      padding-inline: 12px;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    .metric {
+      background: rgba(15,23,42,0.9);
+      border-radius: 6px;
+      border: 1px solid rgba(31,41,55,0.9);
+      padding: 6px 8px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--fg-soft);
+      margin-bottom: 3px;
+    }
+
+    .metric-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .metric-badge {
+      font-size: 9px;
+      margin-top: 0;
+      color: var(--accent2);
+    }
+
+    canvas {
+      background: radial-gradient(circle at top, rgba(15,23,42,1), #020617);
+      border-radius: 7px;
+      border: 1px solid #1f2937;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--fg-soft);
+      font-weight: 500;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.4);
+      display: inline-block;
+    }
+
+    .similar-list {
+      margin-top: 10px;
+    }
+
+    .similar-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 12px;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(31,41,55,0.6);
     }
 
-    /* 텍스트 가독성 조절 */
-    label { font-size: 13px; color: var(--fg-soft); margin-bottom: 5px; display: block; }
-    input, select { 
-      width: 100%; padding: 8px 12px; background: #0f172a; 
-      border: 1px solid var(--border); border-radius: 8px; 
-      color: white; font-size: 14px; margin-bottom: 12px;
+    .similar-item:last-child {
+      border-bottom: none;
     }
 
-    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .metric-box { background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
-    .m-label { font-size: 11px; color: var(--fg-soft); }
-    .m-value { font-size: 20px; font-weight: 700; color: var(--accent-green); }
-
-    /* 차트 컨테이너 */
-    .chart-container { flex: 1; position: relative; min-height: 0; }
-
-    /* 테이블 스타일 */
-    .table-wrapper { overflow-y: auto; flex: 1; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { position: sticky; top: 0; background: #0f172a; text-align: left; padding: 8px; color: var(--fg-soft); }
-    td { padding: 8px; border-bottom: 1px solid var(--border); }
-    td.num { text-align: right; }
-
-    /* 유사 샘플 리스트 */
-    .sim-item { 
-      display: flex; justify-content: space-between; padding: 10px; 
-      background: #0f172a; border-radius: 8px; margin-bottom: 8px; 
-      border: 1px solid var(--border); font-size: 13px;
+    .similar-name {
+      color: var(--fg);
+      font-weight: 500;
     }
 
-    button { 
-      cursor: pointer; padding: 10px; border-radius: 8px; border: none; 
-      font-weight: 600; font-size: 14px; transition: 0.2s;
+    .similar-score {
+      color: var(--accent2);
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+      font-weight: 600;
     }
-    .btn-primary { background: var(--accent-green); color: #000; width: 100%; margin-top: 5px; }
-    .btn-primary:hover { opacity: 0.9; }
 
-    .tag { font-size: 12px; padding: 2px 8px; background: #1e293b; border-radius: 4px; color: var(--accent-blue); }
+    .pill {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      color: var(--fg-soft);
+      margin-left: 4px;
+    }
+
+    .db-table-wrapper {
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      color: var(--fg-soft);
+    }
+
+    th, td {
+      padding: 6px 4px;
+      border-bottom: 1px solid rgba(31,41,55,0.7);
+    }
+
+    th {
+      text-align: left;
+      font-weight: 500;
+      color: #e5e7eb;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .msg {
+      font-size: 12px;
+      color: var(--fg-soft);
+      margin-top: 6px;
+    }
+
+    .msg.error {
+      color: var(--danger);
+    }
+
+    .msg.loading {
+      color: var(--accent2);
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--fg-soft);
+      border-top: 1px solid rgba(31,41,55,0.9);
+      padding-top: 10px;
+    }
+
+    .method-desc {
+      font-size: 11px;
+      color: var(--fg-soft);
+      line-height: 1.4;
+      margin-top: 3px;
+      padding: 6px 8px;
+      background: rgba(15,23,42,0.6);
+      border-radius: 4px;
+      border-left: 2px solid var(--accent2);
+    }
+
+    .section-divider {
+      border-top: 1px solid rgba(31,41,55,0.7);
+      margin: 14px 0;
+      padding-top: 12px;
+    }
   </style>
 </head>
 <body>
-
-<div class="dashboard">
-  <!-- 좌측: 입력 패널 -->
-  <aside class="sidebar">
-    <div class="panel">
-      <div class="panel-title">미지 샘플 입력</div>
-      <label>글루탐산 (mg/g)</label>
-      <input id="glutamate" type="number" step="0.1" value="13">
-      <label>테아닌 (mg/g)</label>
-      <input id="theanine" type="number" step="0.1" value="18">
-      <label>카페인 (mg/g)</label>
-      <input id="caffeine" type="number" step="0.1" value="23">
-      
-      <label>맛 예측 모델</label>
-      <select id="model">
-        <option value="linear">선형회귀</option>
-        <option value="knn">k-NN (k=3)</option>
-      </select>
-      
-      <button class="btn-primary" onclick="runAnalysis()">예측 실행</button>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">예측 결과 (1-9점)</div>
-      <div class="metric-grid">
-        <div class="metric-box"><div class="m-label">감칠맛</div><div class="m-value" id="m-umami">0.0</div></div>
-        <div class="metric-box"><div class="m-label">단맛</div><div class="m-value" id="m-sweetness">0.0</div></div>
-        <div class="metric-box"><div class="m-label">쓴맛</div><div class="m-value" id="m-bitterness">0.0</div></div>
-        <div class="metric-box"><div class="m-label">떫은맛</div><div class="m-value" id="m-astringency">0.0</div></div>
+  <div class="page">
+    <header>
+      <div class="badge">말차 라이브러리 · Matcha Library</div>
+      <div class="title">화학지표 기반 말차 맛 예측 시스템</div>
+      <div class="subtitle">
+        미지 샘플의 글루탐산·테아닌·카페인 함량을 입력하면, 데이터베이스와 통계모델로 감칠맛·단맛·쓴맛·떫은맛을 예측합니다.
       </div>
-    </div>
-  </aside>
+    </header>
 
-  <!-- 우측: 차트 + 데이터 -->
-  <main class="main-content">
-    <!-- 상단: 차트 2개 고정 배치 -->
-    <div class="row-split">
-      <div class="panel">
-        <div class="panel-title">맛 프로파일 (Spider Map)</div>
-        <div class="chart-container">
-          <canvas id="tasteRadar"></canvas>
+    <div class="layout">
+      <!-- 왼쪽: 입력 패널 -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">미지 샘플 화학지표 입력</div>
+        </div>
+
+        <div class="field">
+          <label for="glutamate">글루탐산 (mg/g)</label>
+          <input id="glutamate" type="number" min="0" max="40" step="0.1" value="13" />
+          <div class="hint">감칠맛에 주로 기여</div>
+        </div>
+
+        <div class="field">
+          <label for="theanine">테아닌 (mg/g)</label>
+          <input id="theanine" type="number" min="0" max="40" step="0.1" value="18" />
+          <div class="hint">단맛·부드러움에 기여</div>
+        </div>
+
+        <div class="field">
+          <label for="caffeine">카페인 (mg/g)</label>
+          <input id="caffeine" type="number" min="0" max="40" step="0.1" value="23" />
+          <div class="hint">쓴맛·떫은맛에 영향</div>
+        </div>
+
+        <div class="section-divider">
+          <div class="panel-title" style="margin-bottom: 8px;">통계방법 선택</div>
+
+          <div class="field">
+            <label for="model">맛 예측 모델</label>
+            <select id="model">
+              <option value="linear">선형회귀</option>
+              <option value="knn">k-NN (k=3)</option>
+            </select>
+            <div class="method-desc" id="modelDesc">
+              데이터가 적을 때 안정적. 화학지표와 맛이 선형 비례 관계라고 가정합니다.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="similarity">유사도 척도</label>
+            <select id="similarity">
+              <option value="euclidean">유클리드 거리</option>
+              <option value="cosine">코사인 유사도</option>
+            </select>
+            <div class="method-desc" id="simDesc">
+              절대적 크기 차이를 측정. 모든 화학지표 값이 비슷할수록 가깝다고 판단합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="runBtn" class="primary" onclick="runAnalysis()">예측 실행</button>
+          <button class="secondary" onclick="resetInputs()">초기화</button>
+        </div>
+        <div id="statusMsg" class="msg"></div>
+
+        <div class="section-divider">
+          <div class="panel-title">예측된 맛 프로파일 (1–9점)</div>
+          <div class="panel-caption">Database 기준 통계모델로 예측한 관능 점수</div>
+
+          <div class="metrics-row" id="tasteMetrics">
+            <div class="metric">
+              <div class="metric-label">감칠맛</div>
+              <div class="metric-value" id="m-umami">–</div>
+              <div class="metric-badge">umami</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">단맛</div>
+              <div class="metric-value" id="m-sweetness">–</div>
+              <div class="metric-badge">sweet</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">쓴맛</div>
+              <div class="metric-value" id="m-bitterness">–</div>
+              <div class="metric-badge">bitter</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">떫은맛</div>
+              <div class="metric-value" id="m-astringency">–</div>
+              <div class="metric-badge">astrin</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 오른쪽 섹션 -->
+      <div class="right-section">
+        <!-- 상단: 차트 2개 -->
+        <div class="charts-row">
+          <section class="panel secondary">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">예측 결과 시각화</div>
+                <div class="panel-caption">
+                  예측 맛 vs 가장 유사한 참조 샘플
+                </div>
+              </div>
+            </div>
+            <div class="chart-title">관능 프로파일 (맛 예측 결과, 1-9점)</div>
+            <canvas id="tasteRadar" height="260"></canvas>
+          </section>
+
+          <section class="panel secondary">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">화학지표 비교</div>
+                <div class="panel-caption">
+                  입력 샘플 vs 참조 샘플
+                </div>
+              </div>
+              <div id="refSampleTag" class="tag">참조: –</div>
+            </div>
+            <div class="chart-title">화학지표 프로파일 (입력 vs 참조, mg/g)</div>
+            <canvas id="chemBar" height="260"></canvas>
+          </section>
+        </div>
+
+        <!-- 하단: 유사 샘플 + DB -->
+        <div class="bottom-row">
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">유사 샘플 TOP 3</div>
+            </div>
+            <div class="panel-caption">예측된 맛 프로파일과 가장 비슷한 샘플 순위</div>
+
+            <div class="similar-list" id="similarList">
+              <div class="msg">예측 실행 후 표시됩니다</div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">데이터베이스 <span class="pill">CSV 편집 가능</span></div>
+            </div>
+            <div style="max-height: 280px; overflow: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>산지</th>
+                    <th class="num">Glu</th>
+                    <th class="num">Thea</th>
+                    <th class="num">Caf</th>
+                    <th class="num">감칠</th>
+                    <th class="num">단맛</th>
+                    <th class="num">쓴맛</th>
+                    <th class="num">떫음</th>
+                  </tr>
+                </thead>
+                <tbody id="dbTableBody">
+                  <tr><td colspan="9" style="text-align:center;" class="msg loading">로딩 중...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-title">화학지표 비교 (Bar Chart)</div>
-        <div class="chart-container">
-          <canvas id="chemBar"></canvas>
-        </div>
-      </div>
     </div>
 
-    <!-- 하단: 데이터 2개 고정 배치 -->
-    <div class="row-split">
-      <div class="panel">
-        <div class="panel-title">유사 샘플 TOP 3 <span id="refTag" class="tag">참조: -</span></div>
-        <div id="simList" style="overflow-y: auto;">
-          <div class="sim-item">예측을 실행해 주세요.</div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-title">데이터베이스 (CSV)</div>
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr><th>ID</th><th>산지</th><th>Glu</th><th>Thea</th><th>Caf</th><th>감칠</th><th>단맛</th></tr>
-            </thead>
-            <tbody id="dbTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
+    <footer>
+      CSV 데이터베이스를 GitHub에서 자동 로드합니다. <code>matcha_database.csv</code> 파일을 수정하여 샘플을 추가/편집할 수 있습니다.
+    </footer>
+  </div>
 
-<script>
-  let SAMPLE_DATA = [];
-  let tasteChart = null;
-  let chemChart = null;
+  <script>
+    // ==============================
+    // 전역 변수
+    // ==============================
+    let SAMPLE_DATA = [];
+    const TASTE_KEYS = ["umami", "sweetness", "bitterness", "astringency"];
+    const TASTE_LABELS = { umami: "감칠맛", sweetness: "단맛", bitterness: "쓴맛", astringency: "떫은맛" };
+    const CHEM_KEYS = ["glutamate", "theanine", "caffeine"];
+    const CHEM_LABELS = { glutamate: "글루탐산", theanine: "테아닌", caffeine: "카페인" };
 
-  async function loadData() {
-    try {
-      const res = await fetch('matcha_database.csv');
-      const text = await res.ok ? await res.text() : getFallbackCSV();
-      SAMPLE_DATA = parseCSV(text);
-      renderTable();
-      runAnalysis();
-    } catch(e) { console.error(e); }
-  }
+    let tasteRadarChart = null;
+    let chemBarChart = null;
 
-  function parseCSV(text) {
-    const lines = text.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    return lines.slice(1).map(line => {
-      const values = line.split(',');
-      let obj = {};
-      headers.forEach((h, i) => obj[h] = isNaN(values[i]) ? values[i] : parseFloat(values[i]));
-      return obj;
-    });
-  }
+    // ==============================
+    // CSV 로딩
+    // ==============================
+    async function loadCSV() {
+      const statusEl = document.getElementById("statusMsg");
+      statusEl.textContent = "데이터베이스 로딩 중...";
+      statusEl.className = "msg loading";
 
-  function runAnalysis() {
-    const g = parseFloat(document.getElementById('glutamate').value);
-    const t = parseFloat(document.getElementById('theanine').value);
-    const c = parseFloat(document.getElementById('caffeine').value);
-    
-    // 단순화된 예측 로직
-    const pred = {
-      umami: Math.min(9, Math.max(1, (g * 0.4 + t * 0.2))),
-      sweetness: Math.min(9, Math.max(1, (t * 0.5 - c * 0.05))),
-      bitterness: Math.min(9, Math.max(1, (c * 0.3 - t * 0.1))),
-      astringency: Math.min(9, Math.max(1, (c * 0.25 - g * 0.05)))
-    };
+      try {
+        const response = await fetch("matcha_database.csv");
+        if (!response.ok) throw new Error("CSV 파일을 찾을 수 없습니다.");
+        const text = await response.text();
+        SAMPLE_DATA = parseCSV(text);
 
+        if (SAMPLE_DATA.length === 0) throw new Error("CSV에 데이터가 없습니다.");
+
+        renderDbTable();
+        statusEl.textContent = `데이터베이스 로드 완료: ${SAMPLE_DATA.length}개 샘플`;
+        statusEl.className = "msg";
+
+        // 첫 로드 시 자동 실행
+        setTimeout(() => runAnalysis(), 500);
+      } catch (e) {
+        statusEl.textContent = "오류: " + e.message;
+        statusEl.className = "msg error";
+
+        // 폴백: 내장 샘플 데이터
+        SAMPLE_DATA = getFallbackData();
+        renderDbTable();
+        setTimeout(() => runAnalysis(), 500);
+      }
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split("\n");
+      const headers = lines[0].split(",").map(h => h.trim());
+      const data = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(",").map(v => v.trim());
+        if (values.length < headers.length) continue;
+
+        const row = {};
+        headers.forEach((h, idx) => {
+          row[h] = isNaN(values[idx]) ? values[idx] : parseFloat(values[idx]);
+        });
+        data.push(row);
+      }
+      return data;
+    }
+
+    function getFallbackData() {
+      return [
+        { sample_id: "UJI-01", origin: "우지", glutamate: 14.2, theanine: 19.1, caffeine: 22.8, umami: 7.8, sweetness: 7.2, bitterness: 3.9, astringency: 3.6 },
+        { sample_id: "UJI-02", origin: "우지", glutamate: 12.5, theanine: 16.3, caffeine: 20.4, umami: 7.3, sweetness: 6.8, bitterness: 4.3, astringency: 3.8 },
+        { sample_id: "NISHIO-01", origin: "니시오", glutamate: 10.1, theanine: 14.5, caffeine: 24.2, umami: 6.3, sweetness: 6.2, bitterness: 4.9, astringency: 4.5 },
+        { sample_id: "KAGOSHIMA-01", origin: "가고시마", glutamate: 8.9, theanine: 12.2, caffeine: 27.5, umami: 5.8, sweetness: 5.4, bitterness: 5.5, astringency: 5.2 },
+        { sample_id: "SHIZUOKA-01", origin: "시즈오카", glutamate: 7.5, theanine: 11.8, caffeine: 19.9, umami: 5.2, sweetness: 5.0, bitterness: 4.4, astringency: 4.3 },
+        { sample_id: "FUKUOKA-01", origin: "후쿠오카", glutamate: 11.7, theanine: 17.2, caffeine: 25.1, umami: 6.9, sweetness: 6.4, bitterness: 4.8, astringency: 4.4 }
+      ];
+    }
+
+    // ==============================
+    // 유틸
+    // ==============================
+    function euclideanDistance(a, b, keys) {
+      let sum = 0;
+      for (const k of keys) {
+        const d = a[k] - b[k];
+        sum += d * d;
+      }
+      return Math.sqrt(sum);
+    }
+
+    function cosineDistance(a, b, keys) {
+      let dot = 0, magA = 0, magB = 0;
+      for (const k of keys) {
+        dot += a[k] * b[k];
+        magA += a[k] * a[k];
+        magB += b[k] * b[k];
+      }
+      magA = Math.sqrt(magA);
+      magB = Math.sqrt(magB);
+      if (magA === 0 || magB === 0) return 1;
+      const sim = dot / (magA * magB);
+      return 1 - sim;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function getInputs() {
+      const g = parseFloat(document.getElementById("glutamate").value);
+      const t = parseFloat(document.getElementById("theanine").value);
+      const c = parseFloat(document.getElementById("caffeine").value);
+      if (isNaN(g) || isNaN(t) || isNaN(c)) {
+        throw new Error("모든 수치를 입력해주세요.");
+      }
+      return { glutamate: g, theanine: t, caffeine: c };
+    }
+
+    // ==============================
+    // 예측 로직
+    // ==============================
+    function predictTaste(chem, modelType) {
+      if (modelType === "knn") {
+        return predictKNN(chem, 3);
+      } else {
+        return predictLinear(chem);
+      }
+    }
+
+    function predictKNN(chem, k) {
+      const withDist = SAMPLE_DATA.map(s => {
+        const d = euclideanDistance(chem, s, CHEM_KEYS);
+        return { sample: s, dist: d };
+      }).sort((a, b) => a.dist - b.dist);
+
+      const neighbors = withDist.slice(0, k);
+      let weightSum = 0;
+      const agg = { umami: 0, sweetness: 0, bitterness: 0, astringency: 0 };
+
+      neighbors.forEach(({ sample, dist }) => {
+        const w = 1 / (dist + 0.01);
+        weightSum += w;
+        for (const key of TASTE_KEYS) {
+          agg[key] += sample[key] * w;
+        }
+      });
+
+      const pred = {};
+      for (const key of TASTE_KEYS) {
+        pred[key] = weightSum > 0 ? agg[key] / weightSum : 5;
+        pred[key] = Math.round(clamp(pred[key], 1, 9) * 10) / 10;
+      }
+      return pred;
+    }
+
+    function predictLinear(chem) {
+      const pred = {};
+
+      pred.umami = clamp(2 + chem.glutamate * 0.35 + chem.theanine * 0.15 - chem.caffeine * 0.05, 1, 9);
+      pred.sweetness = clamp(1.5 + chem.theanine * 0.3 + chem.glutamate * 0.1 - chem.caffeine * 0.03, 1, 9);
+      pred.bitterness = clamp(1 + chem.caffeine * 0.15 - chem.theanine * 0.05 - chem.glutamate * 0.05, 1, 9);
+      pred.astringency = clamp(1 + chem.caffeine * 0.12 - chem.theanine * 0.04 - chem.glutamate * 0.04, 1, 9);
+
+      for (const key of TASTE_KEYS) {
+        pred[key] = Math.round(pred[key] * 10) / 10;
+      }
+      return pred;
+    }
+
+    function findSimilarSamples(predTaste, simType) {
+      const distFunc = simType === "cosine" ? cosineDistance : euclideanDistance;
+
+      const arr = SAMPLE_DATA.map(s => {
+        const d = distFunc(predTaste, s, TASTE_KEYS);
+        return { sample: s, dist: d };
+      }).sort((a, b) => a.dist - b.dist);
+
+      const top3 = arr.slice(0, 3);
+      const maxD = top3[top3.length - 1].dist || 1;
+
+      return top3.map(({ sample, dist }) => {
+        const sim = clamp(1 - dist / (maxD + 1e-6), 0, 1);
+        return {
+          sample,
+          distance: dist,
+          similarity: Math.round(sim * 1000) / 10
+        };
+      });
+    }
+
+    // ==============================
     // UI 업데이트
-    document.getElementById('m-umami').innerText = pred.umami.toFixed(1);
-    document.getElementById('m-sweetness').innerText = pred.sweetness.toFixed(1);
-    document.getElementById('m-bitterness').innerText = pred.bitterness.toFixed(1);
-    document.getElementById('m-astringency').innerText = pred.astringency.toFixed(1);
-
-    // 가장 유사한 샘플 찾기 (유클리드 거리)
-    let sorted = SAMPLE_DATA.map(s => {
-      const dist = Math.sqrt(Math.pow(g-s.glutamate, 2) + Math.pow(t-s.theanine, 2) + Math.pow(c-s.caffeine, 2));
-      return { ...s, dist };
-    }).sort((a,b) => a.dist - b.dist);
-
-    const ref = sorted[0];
-    document.getElementById('refTag').innerText = `참조: ${ref.origin} (${ref.sample_id})`;
-
-    renderSimList(sorted.slice(0,3));
-    drawRadar(pred, ref);
-    drawBar({glutamate: g, theanine: t, caffeine: c}, ref);
-  }
-
-  function renderSimList(list) {
-    document.getElementById('simList').innerHTML = list.map((s, i) => `
-      <div class="sim-item">
-        <span><b>${i+1}. ${s.origin}</b> (${s.sample_id})</span>
-        <span style="color:var(--accent-blue)">유사도: ${(100 - s.dist).toFixed(1)}%</span>
-      </div>
-    `).join('');
-  }
-
-  function renderTable() {
-    document.getElementById('dbTableBody').innerHTML = SAMPLE_DATA.map(s => `
-      <tr>
-        <td>${s.sample_id}</td><td>${s.origin}</td>
-        <td class="num">${s.glutamate}</td><td class="num">${s.theanine}</td><td class="num">${s.caffeine}</td>
-        <td class="num">${s.umami}</td><td class="num">${s.sweetness}</td>
-      </tr>
-    `).join('');
-  }
-
-  function drawRadar(pred, ref) {
-    const ctx = document.getElementById('tasteRadar').getContext('2d');
-    if(tasteChart) tasteChart.destroy();
-    tasteChart = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: ['감칠맛', '단맛', '쓴맛', '떫은맛'],
-        datasets: [
-          { label: '예측', data: [pred.umami, pred.sweetness, pred.bitterness, pred.astringency], borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.2)' },
-          { label: '참조', data: [ref.umami, ref.sweetness, ref.bitterness, ref.astringency], borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.2)' }
-        ]
-      },
-      options: { 
-        maintainAspectRatio: false,
-        scales: { r: { min: 1, max: 9, grid: { color: '#334155' }, pointLabels: { color: '#fff', font: { size: 12 } } } },
-        plugins: { legend: { labels: { color: '#fff' } } }
+    // ==============================
+    function updateMetrics(predTaste) {
+      for (const key of TASTE_KEYS) {
+        document.getElementById("m-" + key).textContent = predTaste[key].toFixed(1);
       }
-    });
-  }
+    }
 
-  function drawBar(input, ref) {
-    const ctx = document.getElementById('chemBar').getContext('2d');
-    if(chemChart) chemChart.destroy();
-    chemChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['글루탐산', '테아닌', '카페인'],
-        datasets: [
-          { label: '입력', data: [input.glutamate, input.theanine, input.caffeine], backgroundColor: '#22c55e' },
-          { label: '참조', data: [ref.glutamate, ref.theanine, ref.caffeine], backgroundColor: '#38bdf8' }
-        ]
-      },
-      options: {
-        maintainAspectRatio: false,
-        scales: { 
-          y: { beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#9ca3af' } },
-          x: { ticks: { color: '#fff', font: { size: 12 } } }
+    function updateSimilarList(similarArray) {
+      const listEl = document.getElementById("similarList");
+      if (!similarArray || similarArray.length === 0) {
+        listEl.innerHTML = '<div class="msg">유사 샘플 없음</div>';
+        return;
+      }
+
+      const lines = similarArray.map(({ sample, similarity, distance }, idx) => {
+        return `
+          <div class="similar-item">
+            <div class="similar-name">
+              ${idx + 1}. ${sample.origin} · ${sample.sample_id}
+            </div>
+            <div class="similar-score">
+              ${similarity.toFixed(1)}%
+              <span class="pill">d=${distance.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+      listEl.innerHTML = lines;
+    }
+
+    function updateRefTag(refSample) {
+      const tag = document.getElementById("refSampleTag");
+      if (!refSample) {
+        tag.textContent = "참조: –";
+      } else {
+        tag.textContent = `참조: ${refSample.origin} · ${refSample.sample_id}`;
+      }
+    }
+
+    function renderDbTable() {
+      const tbody = document.getElementById("dbTableBody");
+      tbody.innerHTML = SAMPLE_DATA.map(s => `
+        <tr>
+          <td>${s.sample_id}</td>
+          <td>${s.origin}</td>
+          <td class="num">${s.glutamate.toFixed(1)}</td>
+          <td class="num">${s.theanine.toFixed(1)}</td>
+          <td class="num">${s.caffeine.toFixed(1)}</td>
+          <td class="num">${s.umami.toFixed(1)}</td>
+          <td class="num">${s.sweetness.toFixed(1)}</td>
+          <td class="num">${s.bitterness.toFixed(1)}</td>
+          <td class="num">${s.astringency.toFixed(1)}</td>
+        </tr>
+      `).join("");
+    }
+
+    // ==============================
+    // 차트
+    // ==============================
+    function drawTasteRadar(predTaste, refSample) {
+      const ctx = document.getElementById("tasteRadar").getContext("2d");
+      const labels = TASTE_KEYS.map(k => TASTE_LABELS[k]);
+      const predData = TASTE_KEYS.map(k => predTaste[k]);
+      const refData = refSample ? TASTE_KEYS.map(k => refSample[k]) : [0, 0, 0, 0];
+
+      if (tasteRadarChart) tasteRadarChart.destroy();
+
+      tasteRadarChart = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "예측 맛",
+              data: predData,
+              borderColor: "#22c55e",
+              backgroundColor: "rgba(34,197,94,0.18)",
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: "#22c55e"
+            },
+            {
+              label: refSample ? `참조: ${refSample.origin}` : "참조",
+              data: refData,
+              borderColor: "#38bdf8",
+              backgroundColor: "rgba(56,189,248,0.15)",
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: "#38bdf8"
+            }
+          ]
         },
-        plugins: { legend: { labels: { color: '#fff' } } }
+        options: {
+          scales: {
+            r: {
+              min: 1,
+              max: 9,
+              ticks: { stepSize: 2, color: "#9ca3af", backdropColor: "transparent", font: { size: 10 } },
+              grid: { color: "rgba(55,65,81,0.7)" },
+              angleLines: { color: "rgba(55,65,81,0.8)" },
+              pointLabels: { color: "#e5e7eb", font: { size: 11 } }
+            }
+          },
+          plugins: {
+            legend: { display: true, labels: { color: "#d1d5db", font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    function drawChemBar(chem, refSample) {
+      const ctx = document.getElementById("chemBar").getContext("2d");
+      const labels = CHEM_KEYS.map(k => CHEM_LABELS[k]);
+      const inputData = CHEM_KEYS.map(k => chem[k]);
+      const refData = refSample ? CHEM_KEYS.map(k => refSample[k]) : [0, 0, 0];
+
+      if (chemBarChart) chemBarChart.destroy();
+
+      chemBarChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "입력 샘플",
+              data: inputData,
+              backgroundColor: "rgba(34,197,94,0.6)",
+              borderColor: "#22c55e",
+              borderWidth: 1
+            },
+            {
+              label: refSample ? `참조: ${refSample.origin}` : "참조",
+              data: refData,
+              backgroundColor: "rgba(56,189,248,0.6)",
+              borderColor: "#38bdf8",
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          scales: {
+            x: {
+              ticks: { color: "#d1d5db", font: { size: 11 } },
+              grid: { display: false }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#9ca3af", font: { size: 10 } },
+              grid: { color: "rgba(55,65,81,0.7)" }
+            }
+          },
+          plugins: {
+            legend: { display: true, labels: { color: "#d1d5db", font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // ==============================
+    // 메인 실행
+    // ==============================
+    function runAnalysis() {
+      const statusEl = document.getElementById("statusMsg");
+      const btn = document.getElementById("runBtn");
+      statusEl.textContent = "";
+      statusEl.className = "msg";
+      btn.disabled = true;
+
+      try {
+        if (SAMPLE_DATA.length === 0) throw new Error("데이터베이스가 로드되지 않았습니다.");
+
+        const chem = getInputs();
+        const modelType = document.getElementById("model").value;
+        const simType = document.getElementById("similarity").value;
+
+        const predTaste = predictTaste(chem, modelType);
+        const similarByTaste = findSimilarSamples(predTaste, simType);
+
+        updateMetrics(predTaste);
+        const refSample = similarByTaste[0]?.sample || null;
+        updateRefTag(refSample);
+        updateSimilarList(similarByTaste);
+
+        drawTasteRadar(predTaste, refSample);
+        drawChemBar(chem, refSample);
+
+        statusEl.textContent = `예측 완료 (모델: ${modelType === "knn" ? "k-NN" : "선형회귀"}, 유사도: ${simType === "cosine" ? "코사인" : "유클리드"})`;
+      } catch (e) {
+        statusEl.textContent = "오류: " + e.message;
+        statusEl.className = "msg error";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function resetInputs() {
+      document.getElementById("glutamate").value = 13;
+      document.getElementById("theanine").value = 18;
+      document.getElementById("caffeine").value = 23;
+      document.getElementById("statusMsg").textContent = "";
+    }
+
+    // ==============================
+    // 방법 설명 업데이트
+    // ==============================
+    document.getElementById("model").addEventListener("change", (e) => {
+      const desc = document.getElementById("modelDesc");
+      if (e.target.value === "knn") {
+        desc.textContent = "복잡한 패턴 학습 가능. 화학지표가 가장 가까운 k개 샘플의 맛을 가중 평균합니다.";
+      } else {
+        desc.textContent = "데이터가 적을 때 안정적. 화학지표와 맛이 선형 비례 관계라고 가정합니다.";
       }
     });
-  }
 
-  function getFallbackCSV() {
-    return "sample_id,origin,glutamate,theanine,caffeine,umami,sweetness,bitterness,astringency\nUJI-01,우지,14.2,19.1,22.8,7.8,7.2,3.9,3.6\nUJI-02,우지,12.5,16.3,20.4,7.3,6.8,4.3,3.8\nNISHIO-01,니시오,10.1,14.5,24.2,6.3,6.2,4.9,4.5";
-  }
+    document.getElementById("similarity").addEventListener("change", (e) => {
+      const desc = document.getElementById("simDesc");
+      if (e.target.value === "cosine") {
+        desc.textContent = "맛의 균형(비율)을 비교. 전체 강도는 다르지만 패턴이 비슷한 샘플을 찾습니다.";
+      } else {
+        desc.textContent = "절대적 크기 차이를 측정. 모든 화학지표 값이 비슷할수록 가깝다고 판단합니다.";
+      }
+    });
 
-  window.onload = loadData;
-</script>
+    // ==============================
+    // 초기화
+    // ==============================
+    window.addEventListener("load", () => {
+      loadCSV();
+    });
+  </script>
 </body>
 </html>

@@ -34,51 +34,81 @@
     }
 
     .page {
-      max-width: 1400px;
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 16px 12px 32px;
+      padding: 20px 16px 40px;
     }
 
     header {
-      margin-bottom: 14px;
+      margin-bottom: 20px;
     }
 
     .title {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 600;
       letter-spacing: 0.03em;
-      margin-bottom: 3px;
+      margin-bottom: 6px;
     }
 
     .subtitle {
-      font-size: 11px;
+      font-size: 13px;
       color: var(--fg-soft);
-      max-width: 680px;
-      line-height: 1.4;
+      max-width: 800px;
+      line-height: 1.5;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 10px;
+      font-size: 11px;
       color: var(--accent2);
       background: rgba(15, 23, 42, 1);
       border-radius: 999px;
-      padding: 3px 9px;
+      padding: 4px 12px;
       border: 1px solid rgba(148, 163, 184, 0.25);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 300px) minmax(0, 1fr) minmax(0, 320px);
-      gap: 12px;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
       align-items: flex-start;
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 1100px) {
       .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .right-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .bottom-row {
         grid-template-columns: minmax(0, 1fr);
       }
     }
@@ -87,7 +117,7 @@
       background: radial-gradient(circle at top left, rgba(34,197,94,0.1), rgba(15,23,42,1) 40%);
       border-radius: var(--radius);
       border: 1px solid rgba(31, 41, 55, 0.9);
-      padding: 12px;
+      padding: 16px;
     }
 
     .panel.secondary {
@@ -98,40 +128,40 @@
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .panel-title {
-      font-size: 12px;
+      font-size: 15px;
       font-weight: 600;
     }
 
     .panel-caption {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--fg-soft);
-      margin-top: 2px;
-      line-height: 1.3;
+      margin-top: 3px;
+      line-height: 1.4;
     }
 
     label {
       display: block;
-      font-size: 10px;
+      font-size: 12px;
       color: var(--fg-soft);
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .field {
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     select, input[type="number"] {
       width: 100%;
-      padding: 6px 8px;
+      padding: 8px 10px;
       border-radius: 6px;
       border: 1px solid #1f2937;
       background: rgba(15, 23, 42, 0.95);
       color: var(--fg);
-      font-size: 11px;
+      font-size: 13px;
     }
 
     select:focus, input[type="number"]:focus {
@@ -140,24 +170,24 @@
     }
 
     .hint {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--fg-soft);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .btn-row {
       display: flex;
-      gap: 6px;
-      margin-top: 8px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-top: 12px;
+      margin-bottom: 8px;
     }
 
     button {
       cursor: pointer;
       border-radius: 999px;
       border: 1px solid rgba(148,163,184,0.35);
-      padding: 6px 12px;
-      font-size: 11px;
+      padding: 8px 16px;
+      font-size: 13px;
       background: rgba(15,23,42,0.85);
       color: var(--fg);
     }
@@ -175,38 +205,38 @@
     }
 
     button.secondary {
-      font-size: 10px;
-      padding-inline: 10px;
+      font-size: 12px;
+      padding-inline: 12px;
     }
 
     .metrics-row {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px;
-      margin-top: 8px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 8px;
     }
 
     .metric {
       background: rgba(15,23,42,0.9);
       border-radius: 6px;
       border: 1px solid rgba(31,41,55,0.9);
-      padding: 4px 6px;
+      padding: 6px 8px;
     }
 
     .metric-label {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--fg-soft);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
 
     .metric-value {
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 600;
     }
 
     .metric-badge {
-      font-size: 8px;
+      font-size: 9px;
       margin-top: 0;
       color: var(--accent2);
     }
@@ -217,38 +247,32 @@
       border: 1px solid #1f2937;
     }
 
-    .chart-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 8px;
-      align-items: stretch;
-    }
-
-    @media (max-width: 900px) {
-      .chart-row {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
     .chart-title {
-      font-size: 11px;
-      margin-bottom: 4px;
+      font-size: 13px;
+      margin-bottom: 6px;
       color: var(--fg-soft);
       font-weight: 500;
     }
 
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.4);
+      display: inline-block;
+    }
+
     .similar-list {
-      margin-top: 8px;
-      border-top: 1px solid rgba(31,41,55,0.9);
-      padding-top: 6px;
+      margin-top: 10px;
     }
 
     .similar-item {
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
-      padding: 3px 0;
+      align-items: center;
+      font-size: 12px;
+      padding: 8px 0;
       border-bottom: 1px dashed rgba(31,41,55,0.6);
     }
 
@@ -257,39 +281,39 @@
     }
 
     .similar-name {
-      color: var(--fg-soft);
+      color: var(--fg);
+      font-weight: 500;
     }
 
     .similar-score {
       color: var(--accent2);
       font-variant-numeric: tabular-nums;
-      font-size: 9px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     .pill {
-      font-size: 8px;
-      padding: 1px 5px;
+      font-size: 10px;
+      padding: 2px 6px;
       border-radius: 999px;
       border: 1px solid rgba(148,163,184,0.5);
       color: var(--fg-soft);
-      margin-left: 3px;
+      margin-left: 4px;
     }
 
     .db-table-wrapper {
-      margin-top: 10px;
-      border-top: 1px solid rgba(31,41,55,0.9);
-      padding-top: 6px;
+      margin-top: 12px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 9px;
+      font-size: 11px;
       color: var(--fg-soft);
     }
 
     th, td {
-      padding: 2px 3px;
+      padding: 6px 4px;
       border-bottom: 1px solid rgba(31,41,55,0.7);
     }
 
@@ -298,7 +322,7 @@
       font-weight: 500;
       color: #e5e7eb;
       white-space: nowrap;
-      font-size: 9px;
+      font-size: 11px;
     }
 
     td.num {
@@ -306,19 +330,10 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .tag {
-      font-size: 9px;
-      padding: 1px 5px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.4);
-      display: inline-block;
-    }
-
     .msg {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--fg-soft);
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     .msg.error {
@@ -330,22 +345,28 @@
     }
 
     footer {
-      margin-top: 14px;
-      font-size: 9px;
+      margin-top: 20px;
+      font-size: 11px;
       color: var(--fg-soft);
       border-top: 1px solid rgba(31,41,55,0.9);
-      padding-top: 6px;
+      padding-top: 10px;
     }
 
     .method-desc {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--fg-soft);
-      line-height: 1.3;
-      margin-top: 2px;
-      padding: 4px 6px;
+      line-height: 1.4;
+      margin-top: 3px;
+      padding: 6px 8px;
       background: rgba(15,23,42,0.6);
       border-radius: 4px;
       border-left: 2px solid var(--accent2);
+    }
+
+    .section-divider {
+      border-top: 1px solid rgba(31,41,55,0.7);
+      margin: 14px 0;
+      padding-top: 12px;
     }
   </style>
 </head>
@@ -384,8 +405,8 @@
           <div class="hint">쓴맛·떫은맛에 영향</div>
         </div>
 
-        <div style="border-top: 1px solid rgba(31,41,55,0.7); margin: 10px 0; padding-top: 8px;">
-          <div class="panel-title" style="margin-bottom: 6px;">통계방법 선택</div>
+        <div class="section-divider">
+          <div class="panel-title" style="margin-bottom: 8px;">통계방법 선택</div>
 
           <div class="field">
             <label for="model">맛 예측 모델</label>
@@ -416,7 +437,7 @@
         </div>
         <div id="statusMsg" class="msg"></div>
 
-        <div style="border-top: 1px solid rgba(31,41,55,0.7); margin-top: 8px; padding-top: 8px;">
+        <div class="section-divider">
           <div class="panel-title">예측된 맛 프로파일 (1–9점)</div>
           <div class="panel-caption">Database 기준 통계모델로 예측한 관능 점수</div>
 
@@ -445,67 +466,78 @@
         </div>
       </section>
 
-      <!-- 중앙: 차트 -->
-      <section class="panel secondary">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">예측 결과 시각화</div>
-            <div class="panel-caption">
-              예측 맛(좌측 입력 화학지표로부터 예측) vs 가장 유사한 참조 샘플(database)
+      <!-- 오른쪽 섹션 -->
+      <div class="right-section">
+        <!-- 상단: 차트 2개 -->
+        <div class="charts-row">
+          <section class="panel secondary">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">예측 결과 시각화</div>
+                <div class="panel-caption">
+                  예측 맛 vs 가장 유사한 참조 샘플
+                </div>
+              </div>
             </div>
-          </div>
-          <div id="refSampleTag" class="tag">참조: –</div>
-        </div>
-
-        <div class="chart-row">
-          <div>
             <div class="chart-title">관능 프로파일 (맛 예측 결과, 1-9점)</div>
-            <canvas id="tasteRadar" height="200"></canvas>
-          </div>
-          <div>
-            <div class="chart-title">화학지표 비교 (입력 vs 참조, mg/g)</div>
-            <canvas id="chemBar" height="200"></canvas>
-          </div>
-        </div>
-      </section>
+            <canvas id="tasteRadar" height="260"></canvas>
+          </section>
 
-      <!-- 오른쪽: 유사도 + DB -->
-      <section class="panel">
-        <div class="panel-header">
-          <div class="panel-title">유사 샘플 TOP 3</div>
-        </div>
-        <div class="panel-caption">예측된 맛 프로파일과 가장 비슷한 샘플 순위</div>
-
-        <div class="similar-list" id="similarList">
-          <div class="msg">예측 실행 후 표시됩니다</div>
+          <section class="panel secondary">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">화학지표 비교</div>
+                <div class="panel-caption">
+                  입력 샘플 vs 참조 샘플
+                </div>
+              </div>
+              <div id="refSampleTag" class="tag">참조: –</div>
+            </div>
+            <div class="chart-title">화학지표 프로파일 (입력 vs 참조, mg/g)</div>
+            <canvas id="chemBar" height="260"></canvas>
+          </section>
         </div>
 
-        <div class="db-table-wrapper">
-          <div class="chart-title" style="margin-bottom: 4px;">
-            데이터베이스 <span class="pill">CSV 편집 가능</span>
-          </div>
-          <div style="max-height: 240px; overflow: auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>산지</th>
-                  <th class="num">Glu</th>
-                  <th class="num">Thea</th>
-                  <th class="num">Caf</th>
-                  <th class="num">감칠</th>
-                  <th class="num">단맛</th>
-                  <th class="num">쓴맛</th>
-                  <th class="num">떫음</th>
-                </tr>
-              </thead>
-              <tbody id="dbTableBody">
-                <tr><td colspan="9" style="text-align:center;" class="msg loading">로딩 중...</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <!-- 하단: 유사 샘플 + DB -->
+        <div class="bottom-row">
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">유사 샘플 TOP 3</div>
+            </div>
+            <div class="panel-caption">예측된 맛 프로파일과 가장 비슷한 샘플 순위</div>
+
+            <div class="similar-list" id="similarList">
+              <div class="msg">예측 실행 후 표시됩니다</div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">데이터베이스 <span class="pill">CSV 편집 가능</span></div>
+            </div>
+            <div style="max-height: 280px; overflow: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>산지</th>
+                    <th class="num">Glu</th>
+                    <th class="num">Thea</th>
+                    <th class="num">Caf</th>
+                    <th class="num">감칠</th>
+                    <th class="num">단맛</th>
+                    <th class="num">쓴맛</th>
+                    <th class="num">떫음</th>
+                  </tr>
+                </thead>
+                <tbody id="dbTableBody">
+                  <tr><td colspan="9" style="text-align:center;" class="msg loading">로딩 중...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </div>
 
     <footer>
@@ -666,11 +698,8 @@
     }
 
     function predictLinear(chem) {
-      // 간단 선형회귀: 각 맛에 대해 화학지표의 가중합
-      // 실제로는 least squares fit이 필요하지만, 여기선 휴리스틱 계수 사용
       const pred = {};
 
-      // 휴리스틱 계수 (실무에선 실제 데이터로부터 회귀 계수 계산)
       pred.umami = clamp(2 + chem.glutamate * 0.35 + chem.theanine * 0.15 - chem.caffeine * 0.05, 1, 9);
       pred.sweetness = clamp(1.5 + chem.theanine * 0.3 + chem.glutamate * 0.1 - chem.caffeine * 0.03, 1, 9);
       pred.bitterness = clamp(1 + chem.caffeine * 0.15 - chem.theanine * 0.05 - chem.glutamate * 0.05, 1, 9);
@@ -783,7 +812,7 @@
               borderColor: "#22c55e",
               backgroundColor: "rgba(34,197,94,0.18)",
               borderWidth: 2,
-              pointRadius: 3,
+              pointRadius: 4,
               pointBackgroundColor: "#22c55e"
             },
             {
@@ -792,7 +821,7 @@
               borderColor: "#38bdf8",
               backgroundColor: "rgba(56,189,248,0.15)",
               borderWidth: 2,
-              pointRadius: 3,
+              pointRadius: 4,
               pointBackgroundColor: "#38bdf8"
             }
           ]
@@ -802,14 +831,14 @@
             r: {
               min: 1,
               max: 9,
-              ticks: { stepSize: 2, color: "#9ca3af", backdropColor: "transparent", font: { size: 9 } },
+              ticks: { stepSize: 2, color: "#9ca3af", backdropColor: "transparent", font: { size: 10 } },
               grid: { color: "rgba(55,65,81,0.7)" },
               angleLines: { color: "rgba(55,65,81,0.8)" },
-              pointLabels: { color: "#e5e7eb", font: { size: 10 } }
+              pointLabels: { color: "#e5e7eb", font: { size: 11 } }
             }
           },
           plugins: {
-            legend: { display: true, labels: { color: "#d1d5db", font: { size: 10 } } }
+            legend: { display: true, labels: { color: "#d1d5db", font: { size: 11 } } }
           }
         }
       });
@@ -847,17 +876,17 @@
         options: {
           scales: {
             x: {
-              ticks: { color: "#d1d5db", font: { size: 10 } },
+              ticks: { color: "#d1d5db", font: { size: 11 } },
               grid: { display: false }
             },
             y: {
               beginAtZero: true,
-              ticks: { color: "#9ca3af", font: { size: 9 } },
+              ticks: { color: "#9ca3af", font: { size: 10 } },
               grid: { color: "rgba(55,65,81,0.7)" }
             }
           },
           plugins: {
-            legend: { display: true, labels: { color: "#d1d5db", font: { size: 10 } } }
+            legend: { display: true, labels: { color: "#d1d5db", font: { size: 11 } } }
           }
         }
       });

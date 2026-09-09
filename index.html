@@ -31,27 +31,31 @@
       padding: 0;
       background: radial-gradient(circle at top, #111827 0, #020617 55%, #020617 100%);
       color: var(--fg);
+      overflow-x: hidden;
     }
 
     .page {
       max-width: 1600px;
       margin: 0 auto;
-      padding: 20px 16px 40px;
+      padding: 14px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .title {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 600;
       letter-spacing: 0.03em;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--fg-soft);
       max-width: 800px;
       line-height: 1.5;
@@ -65,51 +69,25 @@
       color: var(--accent2);
       background: rgba(15, 23, 42, 1);
       border-radius: 999px;
-      padding: 4px 12px;
+      padding: 4px 10px;
       border: 1px solid rgba(148, 163, 184, 0.25);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 16px;
-      align-items: flex-start;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1200px) {
       .layout {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: 1fr;
       }
-    }
-
-    .right-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .charts-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    @media (max-width: 900px) {
-      .charts-row {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .bottom-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 900px) {
-      .bottom-row {
-        grid-template-columns: minmax(0, 1fr);
+      .page {
+        height: auto;
       }
     }
 
@@ -118,10 +96,53 @@
       border-radius: var(--radius);
       border: 1px solid rgba(31, 41, 55, 0.9);
       padding: 16px;
+      overflow-y: auto;
     }
 
     .panel.secondary {
       background: radial-gradient(circle at top right, rgba(56,189,248,0.12), #020617 40%);
+    }
+
+    /* 오른쪽 컨테이너 구조 */
+    .right-container {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    /* 상단 차트 영역 */
+    .charts-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .chart-panel {
+      background: radial-gradient(circle at top right, rgba(56,189,248,0.12), #020617 40%);
+      border-radius: var(--radius);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 하단 데이터 영역 */
+    .data-section {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 14px;
+      max-height: 280px;
+    }
+
+    @media (max-width: 1200px) {
+      .charts-section, .data-section {
+        grid-template-columns: 1fr;
+      }
+      .right-container {
+        grid-template-rows: auto;
+      }
     }
 
     .panel-header {
@@ -132,7 +153,7 @@
     }
 
     .panel-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
     }
 
@@ -148,10 +169,11 @@
       font-size: 12px;
       color: var(--fg-soft);
       margin-bottom: 4px;
+      font-weight: 500;
     }
 
     .field {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     select, input[type="number"] {
@@ -178,7 +200,7 @@
     .btn-row {
       display: flex;
       gap: 8px;
-      margin-top: 12px;
+      margin-top: 10px;
       margin-bottom: 8px;
     }
 
@@ -190,13 +212,14 @@
       font-size: 13px;
       background: rgba(15,23,42,0.85);
       color: var(--fg);
+      font-weight: 500;
     }
 
     button.primary {
       border-color: rgba(34,197,94,0.7);
       background: linear-gradient(90deg, #22c55e, #16a34a);
       color: #0b1120;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     button.primary:disabled {
@@ -211,7 +234,7 @@
 
     .metrics-row {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
       margin-top: 10px;
       margin-bottom: 8px;
@@ -221,7 +244,7 @@
       background: rgba(15,23,42,0.9);
       border-radius: 6px;
       border: 1px solid rgba(31,41,55,0.9);
-      padding: 6px 8px;
+      padding: 8px;
     }
 
     .metric-label {
@@ -231,13 +254,13 @@
     }
 
     .metric-value {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
     }
 
     .metric-badge {
       font-size: 9px;
-      margin-top: 0;
+      margin-top: 2px;
       color: var(--accent2);
     }
 
@@ -245,26 +268,21 @@
       background: radial-gradient(circle at top, rgba(15,23,42,1), #020617);
       border-radius: 7px;
       border: 1px solid #1f2937;
+      flex: 1;
+      min-height: 0;
     }
 
     .chart-title {
       font-size: 13px;
-      margin-bottom: 6px;
-      color: var(--fg-soft);
-      font-weight: 500;
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.4);
-      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--fg);
+      font-weight: 600;
     }
 
     .similar-list {
       margin-top: 10px;
+      border-top: 1px solid rgba(31,41,55,0.9);
+      padding-top: 8px;
     }
 
     .similar-item {
@@ -272,7 +290,7 @@
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px dashed rgba(31,41,55,0.6);
     }
 
@@ -293,7 +311,7 @@
     }
 
     .pill {
-      font-size: 10px;
+      font-size: 9px;
       padding: 2px 6px;
       border-radius: 999px;
       border: 1px solid rgba(148,163,184,0.5);
@@ -302,7 +320,8 @@
     }
 
     .db-table-wrapper {
-      margin-top: 12px;
+      overflow-y: auto;
+      max-height: 100%;
     }
 
     table {
@@ -313,21 +332,33 @@
     }
 
     th, td {
-      padding: 6px 4px;
+      padding: 4px 6px;
       border-bottom: 1px solid rgba(31,41,55,0.7);
     }
 
     th {
       text-align: left;
-      font-weight: 500;
+      font-weight: 600;
       color: #e5e7eb;
       white-space: nowrap;
       font-size: 11px;
+      position: sticky;
+      top: 0;
+      background: #020617;
     }
 
     td.num {
       text-align: right;
       font-variant-numeric: tabular-nums;
+    }
+
+    .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.4);
+      display: inline-block;
     }
 
     .msg {
@@ -345,18 +376,18 @@
     }
 
     footer {
-      margin-top: 20px;
-      font-size: 11px;
+      margin-top: 10px;
+      font-size: 10px;
       color: var(--fg-soft);
       border-top: 1px solid rgba(31,41,55,0.9);
-      padding-top: 10px;
+      padding-top: 8px;
     }
 
     .method-desc {
       font-size: 11px;
       color: var(--fg-soft);
       line-height: 1.4;
-      margin-top: 3px;
+      margin-top: 4px;
       padding: 6px 8px;
       background: rgba(15,23,42,0.6);
       border-radius: 4px;
@@ -365,7 +396,7 @@
 
     .section-divider {
       border-top: 1px solid rgba(31,41,55,0.7);
-      margin: 14px 0;
+      margin: 12px 0;
       padding-top: 12px;
     }
   </style>
@@ -466,40 +497,37 @@
         </div>
       </section>
 
-      <!-- 오른쪽 섹션 -->
-      <div class="right-section">
+      <!-- 오른쪽: 차트 + 데이터 -->
+      <div class="right-container">
         <!-- 상단: 차트 2개 -->
-        <div class="charts-row">
-          <section class="panel secondary">
+        <div class="charts-section">
+          <!-- 스파이더맵 -->
+          <div class="chart-panel">
             <div class="panel-header">
               <div>
-                <div class="panel-title">예측 결과 시각화</div>
-                <div class="panel-caption">
-                  예측 맛 vs 가장 유사한 참조 샘플
-                </div>
-              </div>
-            </div>
-            <div class="chart-title">관능 프로파일 (맛 예측 결과, 1-9점)</div>
-            <canvas id="tasteRadar" height="260"></canvas>
-          </section>
-
-          <section class="panel secondary">
-            <div class="panel-header">
-              <div>
-                <div class="panel-title">화학지표 비교</div>
-                <div class="panel-caption">
-                  입력 샘플 vs 참조 샘플
-                </div>
+                <div class="chart-title">관능 프로파일 (맛 예측 결과)</div>
+                <div class="panel-caption">예측 맛 vs 참조 샘플 (1-9점)</div>
               </div>
               <div id="refSampleTag" class="tag">참조: –</div>
             </div>
-            <div class="chart-title">화학지표 프로파일 (입력 vs 참조, mg/g)</div>
-            <canvas id="chemBar" height="260"></canvas>
-          </section>
+            <canvas id="tasteRadar"></canvas>
+          </div>
+
+          <!-- 막대그래프 -->
+          <div class="chart-panel">
+            <div class="panel-header">
+              <div>
+                <div class="chart-title">화학지표 비교</div>
+                <div class="panel-caption">입력 샘플 vs 참조 샘플 (mg/g)</div>
+              </div>
+            </div>
+            <canvas id="chemBar"></canvas>
+          </div>
         </div>
 
-        <!-- 하단: 유사 샘플 + DB -->
-        <div class="bottom-row">
+        <!-- 하단: 유사 샘플 + 데이터베이스 -->
+        <div class="data-section">
+          <!-- 유사 샘플 TOP 3 -->
           <section class="panel">
             <div class="panel-header">
               <div class="panel-title">유사 샘플 TOP 3</div>
@@ -511,11 +539,14 @@
             </div>
           </section>
 
+          <!-- 데이터베이스 테이블 -->
           <section class="panel">
             <div class="panel-header">
-              <div class="panel-title">데이터베이스 <span class="pill">CSV 편집 가능</span></div>
+              <div>
+                <div class="panel-title">데이터베이스 <span class="pill">CSV 편집 가능</span></div>
+              </div>
             </div>
-            <div style="max-height: 280px; overflow: auto;">
+            <div class="db-table-wrapper">
               <table>
                 <thead>
                   <tr>
@@ -698,6 +729,7 @@
     }
 
     function predictLinear(chem) {
+      // 간단 선형회귀: 각 맛에 대해 화학지표의 가중합
       const pred = {};
 
       pred.umami = clamp(2 + chem.glutamate * 0.35 + chem.theanine * 0.15 - chem.caffeine * 0.05, 1, 9);
@@ -827,18 +859,28 @@
           ]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: true,
           scales: {
             r: {
               min: 1,
               max: 9,
-              ticks: { stepSize: 2, color: "#9ca3af", backdropColor: "transparent", font: { size: 10 } },
+              ticks: { 
+                stepSize: 2, 
+                color: "#9ca3af", 
+                backdropColor: "transparent", 
+                font: { size: 11 } 
+              },
               grid: { color: "rgba(55,65,81,0.7)" },
               angleLines: { color: "rgba(55,65,81,0.8)" },
-              pointLabels: { color: "#e5e7eb", font: { size: 11 } }
+              pointLabels: { color: "#e5e7eb", font: { size: 12 } }
             }
           },
           plugins: {
-            legend: { display: true, labels: { color: "#d1d5db", font: { size: 11 } } }
+            legend: { 
+              display: true, 
+              labels: { color: "#d1d5db", font: { size: 12 } } 
+            }
           }
         }
       });
@@ -860,33 +902,38 @@
             {
               label: "입력 샘플",
               data: inputData,
-              backgroundColor: "rgba(34,197,94,0.6)",
+              backgroundColor: "rgba(34,197,94,0.7)",
               borderColor: "#22c55e",
-              borderWidth: 1
+              borderWidth: 1.5
             },
             {
               label: refSample ? `참조: ${refSample.origin}` : "참조",
               data: refData,
-              backgroundColor: "rgba(56,189,248,0.6)",
+              backgroundColor: "rgba(56,189,248,0.7)",
               borderColor: "#38bdf8",
-              borderWidth: 1
+              borderWidth: 1.5
             }
           ]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: true,
           scales: {
             x: {
-              ticks: { color: "#d1d5db", font: { size: 11 } },
+              ticks: { color: "#d1d5db", font: { size: 12 } },
               grid: { display: false }
             },
             y: {
               beginAtZero: true,
-              ticks: { color: "#9ca3af", font: { size: 10 } },
+              ticks: { color: "#9ca3af", font: { size: 11 } },
               grid: { color: "rgba(55,65,81,0.7)" }
             }
           },
           plugins: {
-            legend: { display: true, labels: { color: "#d1d5db", font: { size: 11 } } }
+            legend: { 
+              display: true, 
+              labels: { color: "#d1d5db", font: { size: 12 } } 
+            }
           }
         }
       });

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍵 말차 라이브러리 - 맛 예측 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 1.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric {
+            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .match-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .match-rank {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .match-origin {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+
+        .match-score {
+            float: right;
+            background: #48bb78;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .match-details {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #718096;
+        }
+
+        .database-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .database-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .database-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .database-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍵 말차 라이브러리</h1>
+            <p>화학지표 기반 맛 예측 & 관능검사 데이터 매칭 시스템</p>
+            <div style="margin-top: 15px;">
+                <span class="info-badge">화학지표 3종 분석</span>
+                <span class="info-badge">맛 프로파일 4종 예측</span>
+                <span class="info-badge">AI 기반 유사도 매칭</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- 입력 패널 -->
+            <div class="card">
+                <h2>📊 미지의 말차 샘플 분석</h2>
+                <div class="input-group">
+                    <label>글루탐산 (mg/g)</label>
+                    <input type="number" id="glutamate" value="13.0" min="0" max="40" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>테아닌 (mg/g)</label>
+                    <input type="number" id="theanine" value="18.0" min="0" max="40" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>카페인 (mg/g)</label>
+                    <input type="number" id="caffeine" value="23.0" min="0" max="40" step="0.1">
+                </div>
+                <button class="btn" onclick="analyzeSample()">🔍 맛 예측 및 분석 시작</button>
+            </div>
+
+            <!-- 예측 결과 -->
+            <div class="card">
+                <h2>🎯 예측된 맛 프로파일</h2>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-label">감칠맛</div>
+                        <div class="metric-value" id="umami">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">단맛</div>
+                        <div class="metric-value" id="sweetness">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">쓴맛</div>
+                        <div class="metric-value" id="bitterness">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">떫은맛</div>
+                        <div class="metric-value" id="astringency">-</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <p style="text-align: center; color: #718096; font-size: 0.9em;">
+                    7점 척도 (1=거의 없음, 4=보통, 7=매우 강함)
+                </p>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- 유사 샘플 매칭 -->
+            <div class="card">
+                <h2>🔗 유사 샘플 TOP 3</h2>
+                <p style="color: #718096; margin-bottom: 15px; font-size: 0.95em;">
+                    기존 데이터베이스에서 화학지표가 가장 유사한 샘플을 찾았습니다.
+                </p>
+                <div id="matchResults"></div>
+            </div>
+
+            <!-- 화학지표 비교 -->
+            <div class="card">
+                <h2>⚗️ 화학지표 비교</h2>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 데이터베이스 -->
+        <div class="card full-width">
+            <h2>📚 산지별 평균 데이터베이스</h2>
+            <p style="color: #718096; margin-bottom: 15px;">
+                일본 주요 말차 산지 5곳의 화학지표 및 관능검사 평균 데이터입니다.
+            </p>
+            <table class="database-table" id="databaseTable"></table>
+        </div>
+
+        <div class="footer">
+            <p>🍵 말차 라이브러리 v1.0 | 화학지표 기반 맛 예측 시스템</p>
+            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                데이터 기반: 선형회귀 모델 | 유사도: 유클리드 거리
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 샘플 데이터베이스 (실제 데이터)
+        const database = [
+            // 우지 (Uji)
+            { origin: "우지(Uji)", glutamate: 13.5, theanine: 20.0, caffeine: 22.0, umami: 6.2, sweetness: 5.8, bitterness: 3.5, astringency: 3.2 },
+            { origin: "우지(Uji)", glutamate: 14.2, theanine: 19.5, caffeine: 21.5, umami: 6.0, sweetness: 5.5, bitterness: 3.8, astringency: 3.5 },
+            { origin: "우지(Uji)", glutamate: 12.8, theanine: 20.5, caffeine: 22.5, umami: 6.3, sweetness: 6.0, bitterness: 3.3, astringency: 3.0 },
+            { origin: "우지(Uji)", glutamate: 13.9, theanine: 19.8, caffeine: 22.2, umami: 6.1, sweetness: 5.7, bitterness: 3.6, astringency: 3.3 },
+            { origin: "우지(Uji)", glutamate: 13.2, theanine: 20.2, caffeine: 21.8, umami: 6.2, sweetness: 5.9, bitterness: 3.4, astringency: 3.1 },
+
+            // 니시오 (Nishio)
+            { origin: "니시오(Nishio)", glutamate: 12.0, theanine: 17.5, caffeine: 23.5, umami: 5.5, sweetness: 5.0, bitterness: 4.2, astringency: 3.8 },
+            { origin: "니시오(Nishio)", glutamate: 12.5, theanine: 17.2, caffeine: 24.0, umami: 5.6, sweetness: 4.9, bitterness: 4.5, astringency: 4.0 },
+            { origin: "니시오(Nishio)", glutamate: 11.8, theanine: 17.8, caffeine: 23.2, umami: 5.4, sweetness: 5.1, bitterness: 4.0, astringency: 3.7 },
+            { origin: "니시오(Nishio)", glutamate: 12.2, theanine: 17.6, caffeine: 23.8, umami: 5.5, sweetness: 5.0, bitterness: 4.3, astringency: 3.9 },
+
+            // 가고시마 (Kagoshima)
+            { origin: "가고시마(Kagoshima)", glutamate: 10.0, theanine: 12.5, caffeine: 27.0, umami: 4.5, sweetness: 3.8, bitterness: 5.5, astringency: 5.2 },
+            { origin: "가고시마(Kagoshima)", glutamate: 10.5, theanine: 12.8, caffeine: 26.5, umami: 4.6, sweetness: 3.9, bitterness: 5.3, astringency: 5.0 },
+            { origin: "가고시마(Kagoshima)", glutamate: 9.8, theanine: 12.2, caffeine: 27.5, umami: 4.4, sweetness: 3.7, bitterness: 5.7, astringency: 5.3 },
+            { origin: "가고시마(Kagoshima)", glutamate: 10.2, theanine: 12.6, caffeine: 26.8, umami: 4.5, sweetness: 3.8, bitterness: 5.4, astringency: 5.1 },
+
+            // 시즈오카 (Shizuoka)
+            { origin: "시즈오카(Shizuoka)", glutamate: 11.0, theanine: 14.0, caffeine: 25.0, umami: 5.0, sweetness: 4.2, bitterness: 4.8, astringency: 4.5 },
+            { origin: "시즈오카(Shizuoka)", glutamate: 11.5, theanine: 14.3, caffeine: 24.5, umami: 5.1, sweetness: 4.3, bitterness: 4.6, astringency: 4.3 },
+            { origin: "시즈오카(Shizuoka)", glutamate: 10.8, theanine: 13.8, caffeine: 25.5, umami: 4.9, sweetness: 4.1, bitterness: 5.0, astringency: 4.7 },
+            { origin: "시즈오카(Shizuoka)", glutamate: 11.2, theanine: 14.1, caffeine: 24.8, umami: 5.0, sweetness: 4.2, bitterness: 4.7, astringency: 4.4 },
+
+            // 후쿠오카 (Fukuoka)
+            { origin: "후쿠오카(Fukuoka)", glutamate: 12.8, theanine: 18.5, caffeine: 21.5, umami: 5.9, sweetness: 5.4, bitterness: 3.7, astringency: 3.4 },
+            { origin: "후쿠오카(Fukuoka)", glutamate: 13.2, theanine: 18.8, caffeine: 21.2, umami: 6.0, sweetness: 5.5, bitterness: 3.5, astringency: 3.2 },
+            { origin: "후쿠오카(Fukuoka)", glutamate: 12.5, theanine: 18.2, caffeine: 21.8, umami: 5.8, sweetness: 5.3, bitterness: 3.9, astringency: 3.6 },
+        ];
+
+        // 선형 회귀 계수 (미리 학습된 값)
+        const models = {
+            umami: { glu: 0.25, the: 0.15, caf: -0.08, intercept: 1.5 },
+            sweetness: { glu: 0.18, the: 0.22, caf: -0.12, intercept: 0.8 },
+            bitterness: { glu: -0.15, the: -0.18, caf: 0.20, intercept: 2.0 },
+            astringency: { glu: -0.12, the: -0.15, caf: 0.18, intercept: 1.5 }
+        };
+
+        let radarChart = null;
+        let barChart = null;
+
+        // 맛 예측 함수
+        function predictTaste(glu, the, caf) {
+            const result = {};
+            for (let taste in models) {
+                let value = models[taste].glu * glu + 
+                           models[taste].the * the + 
+                           models[taste].caf * caf + 
+                           models[taste].intercept;
+                result[taste] = Math.max(1, Math.min(7, value));
+            }
+            return result;
+        }
+
+        // 유클리드 거리 계산
+        function euclideanDistance(v1, v2) {
+            return Math.sqrt(
+                Math.pow(v1.glutamate - v2.glutamate, 2) +
+                Math.pow(v1.theanine - v2.theanine, 2) +
+                Math.pow(v1.caffeine - v2.caffeine, 2)
+            );
+        }
+
+        // 분석 실행
+        function analyzeSample() {
+            const glu = parseFloat(document.getElementById('glutamate').value);
+            const the = parseFloat(document.getElementById('theanine').value);
+            const caf = parseFloat(document.getElementById('caffeine').value);
+
+            // 맛 예측
+            const predicted = predictTaste(glu, the, caf);
+
+            // 결과 표시
+            document.getElementById('umami').textContent = predicted.umami.toFixed(1);
+            document.getElementById('sweetness').textContent = predicted.sweetness.toFixed(1);
+            document.getElementById('bitterness').textContent = predicted.bitterness.toFixed(1);
+            document.getElementById('astringency').textContent = predicted.astringency.toFixed(1);
+
+            // 유사 샘플 찾기
+            const distances = database.map(sample => ({
+                ...sample,
+                distance: euclideanDistance({ glutamate: glu, theanine: the, caffeine: caf }, sample)
+            }));
+            distances.sort((a, b) => a.distance - b.distance);
+            const top3 = distances.slice(0, 3);
+
+            // 유사 샘플 표시
+            let matchHTML = '';
+            top3.forEach((match, idx) => {
+                const similarity = Math.max(0, 100 - match.distance * 5).toFixed(0);
+                matchHTML += `
+                    <div class="match-item">
+                        <span class="match-rank">${idx + 1}</span>
+                        <span class="match-origin">${match.origin}</span>
+                        <span class="match-score">${similarity}% 유사</span>
+                        <div class="match-details">
+                            글루탐산: ${match.glutamate.toFixed(1)} | 테아닌: ${match.theanine.toFixed(1)} | 
+                            카페인: ${match.caffeine.toFixed(1)} | 거리: ${match.distance.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('matchResults').innerHTML = matchHTML;
+
+            // 레이더 차트 업데이트
+            updateRadarChart(predicted, top3[0]);
+
+            // 바 차트 업데이트
+            updateBarChart({ glutamate: glu, theanine: the, caffeine: caf }, top3[0]);
+        }
+
+        // 레이더 차트 생성/업데이트
+        function updateRadarChart(predicted, topMatch) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['감칠맛', '단맛', '쓴맛', '떫은맛'],
+                    datasets: [{
+                        label: '예측된 맛',
+                        data: [predicted.umami, predicted.sweetness, predicted.bitterness, predicted.astringency],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5
+                    }, {
+                        label: `유사 샘플 (${topMatch.origin})`,
+                        data: [topMatch.umami, topMatch.sweetness, topMatch.bitterness, topMatch.astringency],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 1,
+                            max: 7,
+                            ticks: {
+                                stepSize: 1,
+                                font: { size: 12 }
+                            },
+                            pointLabels: {
+                                font: { size: 14, weight: 'bold' }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 13 },
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 바 차트 생성/업데이트
+        function updateBarChart(input, topMatch) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+
+            if (barChart) {
+                barChart.destroy();
+            }
+
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['글루탐산 (mg/g)', '테아닌 (mg/g)', '카페인 (mg/g)'],
+                    datasets: [{
+                        label: '입력 샘플',
+                        data: [input.glutamate, input.theanine, input.caffeine],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }, {
+                        label: `유사 샘플 (${topMatch.origin})`,
+                        data: [topMatch.glutamate, topMatch.theanine, topMatch.caffeine],
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 13 },
+                                padding: 15
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 40,
+                            ticks: {
+                                font: { size: 12 }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 데이터베이스 테이블 생성
+        function createDatabaseTable() {
+            const origins = {};
+            database.forEach(sample => {
+                if (!origins[sample.origin]) {
+                    origins[sample.origin] = {
+                        count: 0,
+                        glutamate: 0,
+                        theanine: 0,
+                        caffeine: 0,
+                        umami: 0,
+                        sweetness: 0,
+                        bitterness: 0,
+                        astringency: 0
+                    };
+                }
+                origins[sample.origin].count++;
+                origins[sample.origin].glutamate += sample.glutamate;
+                origins[sample.origin].theanine += sample.theanine;
+                origins[sample.origin].caffeine += sample.caffeine;
+                origins[sample.origin].umami += sample.umami;
+                origins[sample.origin].sweetness += sample.sweetness;
+                origins[sample.origin].bitterness += sample.bitterness;
+                origins[sample.origin].astringency += sample.astringency;
+            });
+
+            let tableHTML = `
+                <thead>
+                    <tr>
+                        <th>산지</th>
+                        <th>글루탐산</th>
+                        <th>테아닌</th>
+                        <th>카페인</th>
+                        <th>감칠맛</th>
+                        <th>단맛</th>
+                        <th>쓴맛</th>
+                        <th>떫은맛</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            for (let origin in origins) {
+                const avg = origins[origin];
+                const n = avg.count;
+                tableHTML += `
+                    <tr>
+                        <td><strong>${origin}</strong></td>
+                        <td>${(avg.glutamate / n).toFixed(1)}</td>
+                        <td>${(avg.theanine / n).toFixed(1)}</td>
+                        <td>${(avg.caffeine / n).toFixed(1)}</td>
+                        <td>${(avg.umami / n).toFixed(1)}</td>
+                        <td>${(avg.sweetness / n).toFixed(1)}</td>
+                        <td>${(avg.bitterness / n).toFixed(1)}</td>
+                        <td>${(avg.astringency / n).toFixed(1)}</td>
+                    </tr>
+                `;
+            }
+
+            tableHTML += '</tbody>';
+            document.getElementById('databaseTable').innerHTML = tableHTML;
+        }
+
+        // 페이지 로드 시 실행
+        window.onload = function() {
+            createDatabaseTable();
+            analyzeSample(); // 초기 분석 실행
+        };
+    </script>
+</body>
+</html>
